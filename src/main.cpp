@@ -106,6 +106,11 @@ int main()
                     << "Kp=" << twiddle.parameters[0] << ", "
                     << "Ki=" << twiddle.parameters[1] << ", "
                     << "Kd=" << twiddle.parameters[2] << std::endl;
+                  std::cout << "\033[0;37m"; // switch to gray text
+                  std::cout << "New deltas: "
+                    << "deltaKp=" << twiddle.deltas[0] << ", "
+                    << "deltaKi=" << twiddle.deltas[1] << ", "
+                    << "deltaKd=" << twiddle.deltas[2] << std::endl;
                   std::cout << "\033[0m"; // reset colors
                 }
                 ++twiddle_frames;
