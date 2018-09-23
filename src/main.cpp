@@ -71,6 +71,8 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
+          static double last_steer_value = 0;
+          static double steer_value_delta = 0;
           if (do_twiddle_optimization) {
             static int twiddle_frames = 0;
             static double twiddle_error = 0.0;
@@ -82,7 +84,7 @@ int main()
               }
             } else {
               if (twiddle_frames > 100) {
-                twiddle_error += cte * cte;
+                twiddle_error += cte * cte + steer_value_delta * steer_value_delta * 10;
               }
               if (twiddle_frames > 4000) {
                 auto better = twiddle.GenerateNextParameters(twiddle_error);
@@ -118,6 +120,8 @@ int main()
             }
           }
           steer_value = pid.Update(cte);
+          steer_value_delta = steer_value - last_steer_value;
+          last_steer_value = steer_value;
 
           // DEBUG
           if (!do_twiddle_optimization) {
