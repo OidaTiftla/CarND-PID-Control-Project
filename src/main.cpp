@@ -1,6 +1,7 @@
 #include <uWS/uWS.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include "json.hpp"
 #include "PID.h"
 #include "twiddle.hpp"
@@ -85,8 +86,8 @@ int main()
               }
             } else {
               if (twiddle_frames > 100) {
-                twiddle_error_pos += cte * cte * cte * cte * 0.1;
-                twiddle_error_steer += steer_value_delta * steer_value_delta * steer_value_delta * steer_value_delta * 4;
+                twiddle_error_pos += std::max(0.0, pow(cte, 4) - 0.125);
+                twiddle_error_steer += std::max(0.0, pow(steer_value_delta, 2) * 10);
               }
               if (twiddle_frames > 4000) {
                 auto better = twiddle.GenerateNextParameters(twiddle_error_pos + twiddle_error_steer);
