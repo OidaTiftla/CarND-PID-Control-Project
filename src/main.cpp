@@ -1,7 +1,9 @@
 #include <uWS/uWS.h>
 #include <iostream>
+#include <vector>
 #include "json.hpp"
 #include "PID.h"
+#include "twiddle.hpp"
 #include <math.h>
 
 // for convenience
@@ -34,10 +36,19 @@ int main()
 
   PID pid;
   // TODO: Initialize the pid variable.
-  pid.Init(0.2, 0.000002, 0.5);
+  pid.Init(0.2, 0.00000002, 1);
   pid.SetOutputLimits(-1.0, 1.0);
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  Twiddle twiddle;
+  twiddle.parameters.push_back(0.2);
+  twiddle.parameters.push_back(0.00000002);
+  twiddle.parameters.push_back(1);
+  twiddle.deltas.push_back(0.2 * 0.5);
+  twiddle.deltas.push_back(0.00000002 * 0.5);
+  twiddle.deltas.push_back(1 * 0.5);
+  bool do_twiddle_optimization = true;
+
+  h.onMessage([&pid, &twiddle, &do_twiddle_optimization](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -59,16 +70,42 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
+          if (do_twiddle_optimization) {
+            static int twiddle_frames = 0;
+            static double twiddle_error = 0.0;
+            if (twiddle_frames > 100) {
+              twiddle_error += cte * cte;
+            }
+            if (twiddle_frames > 400) {
+              twiddle.GenerateNextParameters(twiddle_error);
+              twiddle_frames = 0;
+              twiddle_error = 0.0;
+            }
+            if (twiddle_frames <= 0) {
+              pid.Init(twiddle.parameters[0], twiddle.parameters[1], twiddle.parameters[2]);
+              std::cout << "\033[1;31m"; // switch to red bold text
+              std::cout << "New parameters: "
+                << "Kp=" << twiddle.parameters[0] << ", "
+                << "Ki=" << twiddle.parameters[1] << ", "
+                << "Kd=" << twiddle.parameters[2] << std::endl;
+              std::cout << "\033[0m"; // reset colors
+            }
+            ++twiddle_frames;
+          }
           steer_value = pid.Update(cte);
 
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          if (!do_twiddle_optimization) {
+            std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          }
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          if (!do_twiddle_optimization) {
+            std::cout << msg << std::endl;
+          }
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
