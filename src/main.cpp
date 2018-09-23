@@ -40,12 +40,12 @@ int main()
   pid.SetOutputLimits(-1.0, 1.0);
 
   Twiddle twiddle;
-  twiddle.parameters.push_back(0.2);
-  twiddle.parameters.push_back(0.00000002);
-  twiddle.parameters.push_back(1);
-  twiddle.deltas.push_back(0.2 * 0.5);
-  twiddle.deltas.push_back(0.00000002 * 0.5);
-  twiddle.deltas.push_back(1 * 0.5);
+  twiddle.parameters.push_back(pid.Kp);
+  twiddle.parameters.push_back(pid.Ki);
+  twiddle.parameters.push_back(pid.Kd);
+  twiddle.deltas.push_back(pid.Kp * 0.05);
+  twiddle.deltas.push_back(pid.Ki * 0.05);
+  twiddle.deltas.push_back(pid.Kd * 0.05);
   bool do_twiddle_optimization = true;
   bool restarted = false;
 
