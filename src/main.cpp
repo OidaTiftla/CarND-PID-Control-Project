@@ -86,7 +86,11 @@ int main()
               }
               if (twiddle_frames > 4000) {
                 auto better = twiddle.GenerateNextParameters(twiddle_error);
+                if (better) {
+                  std::cout << "\033[32m"; // switch to green text
+                }
                 std::cout << (better ? "better" : "worse") << " error: " << twiddle_error << std::endl;
+                std::cout << "\033[0m"; // reset colors
                 twiddle_frames = 0;
                 twiddle_error = 0.0;
                 restarted = false;
