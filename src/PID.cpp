@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "PID.h"
 
 using namespace std;
@@ -6,7 +8,10 @@ using namespace std;
 * TODO: Complete the PID class.
 */
 
-PID::PID() {}
+PID::PID() {
+    this->min = -std::numeric_limits<const double>::infinity();
+    this->max = std::numeric_limits<const double>::infinity();
+}
 
 PID::~PID() {}
 
@@ -18,19 +23,27 @@ void PID::Init(double Kp, double Ki, double Kd) {
     this->init_last_cte = false;
 }
 
+void PID::SetOutputLimits(double min, double max) {
+    this->min = min;
+    this->max = max;
+}
+
 double PID::Update(double cte) {
     if (!this->init_last_cte) {
         this->last_cte = cte;
         this->init_last_cte = true;
     }
 
-    this->integral += cte;
-    auto diff = cte - this->last_cte;
+    // proportional
+    auto p = this->Kp * cte;
+    // integral
+    this->integral += this->Ki * cte;
+    this->integral = std::max(this->min, std::min(this->max, this->integral));
+    auto i = this->integral;
+    // differential
+    auto d = this->Kd * (cte - this->last_cte);
     this->last_cte = cte;
 
-    auto p = this->Kp * cte;
-    auto i = this->Ki * this->integral;
-    auto d = this->Kd * diff;
-
-    return -p - i - d;
+    auto output = -p - i - d;
+    return std::max(this->min, std::min(this->max, output));
 }
