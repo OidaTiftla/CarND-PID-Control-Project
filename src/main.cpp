@@ -76,7 +76,7 @@ int main()
             if (twiddle_frames > 100) {
               twiddle_error += cte * cte;
             }
-            if (twiddle_frames > 400) {
+            if (twiddle_frames > 4000) {
               auto better = twiddle.GenerateNextParameters(twiddle_error);
               std::cout << (better ? "better" : "worse") << " error: " << twiddle_error << std::endl;
               twiddle_frames = 0;
