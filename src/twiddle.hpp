@@ -9,14 +9,17 @@ public:
     std::vector<double> deltas;
     double best_err = std::numeric_limits<const double>::infinity();
 
-    void GenerateNextParameters(double err) {
+    // returns whether the last parameters were better (true) or not (false)
+    bool GenerateNextParameters(double err) {
         static int param_index = 0;
         static bool tested_add = false;
         static bool tested_sub = false;
+        bool better = false;
 
         if (tested_add) {
             if (err < this->best_err) {
                 this->best_err = err;
+                better = true;
                 this->deltas[param_index] *= 1.1;
                 ++param_index;
                 if (param_index >= this->parameters.size()) {
@@ -33,6 +36,7 @@ public:
         } else if (tested_sub) {
             if (err < this->best_err) {
                 this->best_err = err;
+                better = true;
                 this->deltas[param_index] *= 1.1;
             } else {
                 this->parameters[param_index] += this->deltas[param_index];
@@ -47,10 +51,12 @@ public:
             tested_sub = false;
         } else {
             this->best_err = err;
+            better = true;
             this->parameters[param_index] += this->deltas[param_index];
             tested_add = true;
             tested_sub = false;
         }
+        return better;
     }
 };
 
