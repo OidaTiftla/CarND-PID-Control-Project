@@ -88,6 +88,8 @@ int main()
                 auto better = twiddle.GenerateNextParameters(twiddle_error);
                 if (better) {
                   std::cout << "\033[0;32m"; // switch to green text
+                } else {
+                  std::cout << "\033[0;31m"; // switch to red text
                 }
                 std::cout << (better ? "better" : "worse") << " error: " << twiddle_error << std::endl;
                 std::cout << "\033[0m"; // reset colors
@@ -99,7 +101,7 @@ int main()
               } else {
                 if (twiddle_frames <= 0) {
                   pid.Init(twiddle.parameters[0], twiddle.parameters[1], twiddle.parameters[2]);
-                  std::cout << "\033[0;1;31m"; // switch to red bold text
+                  std::cout << "\033[0;1;36m"; // switch to cyan bold text
                   std::cout << "New parameters: "
                     << "Kp=" << twiddle.parameters[0] << ", "
                     << "Ki=" << twiddle.parameters[1] << ", "
