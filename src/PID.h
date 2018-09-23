@@ -4,11 +4,11 @@
 class PID {
 public:
   /*
-  * Errors
+  * state variables
   */
-  double p_error;
-  double i_error;
-  double d_error;
+  double integral;
+  double last_cte;
+  bool init_last_cte;
 
   /*
   * Coefficients
@@ -33,14 +33,9 @@ public:
   void Init(double Kp, double Ki, double Kd);
 
   /*
-  * Update the PID error variables given cross track error.
+  * Update the PID with given cross track error.
   */
-  void UpdateError(double cte);
-
-  /*
-  * Calculate the total PID error.
-  */
-  double TotalError();
+  double Update(double cte);
 };
 
 #endif /* PID_H */
