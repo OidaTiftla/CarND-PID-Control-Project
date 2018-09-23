@@ -75,7 +75,8 @@ int main()
           static double steer_value_delta = 0;
           if (do_twiddle_optimization) {
             static int twiddle_frames = 0;
-            static double twiddle_error = 0.0;
+            static double twiddle_error_pos = 0.0;
+            static double twiddle_error_steer = 0.0;
             static bool wait_for_restart = false;
             if (wait_for_restart) {
               if (restarted) {
@@ -84,19 +85,21 @@ int main()
               }
             } else {
               if (twiddle_frames > 100) {
-                twiddle_error += cte * cte + steer_value_delta * steer_value_delta * 10;
+                twiddle_error_pos += cte * cte * cte * cte * 0.1;
+                twiddle_error_steer += steer_value_delta * steer_value_delta * steer_value_delta * steer_value_delta * 4;
               }
               if (twiddle_frames > 4000) {
-                auto better = twiddle.GenerateNextParameters(twiddle_error);
+                auto better = twiddle.GenerateNextParameters(twiddle_error_pos + twiddle_error_steer);
                 if (better) {
                   std::cout << "\033[0;32m"; // switch to green text
                 } else {
                   std::cout << "\033[0;31m"; // switch to red text
                 }
-                std::cout << (better ? "better" : "worse") << " error: " << twiddle_error << std::endl;
+                std::cout << (better ? "better" : "worse") << " error_pos: " << twiddle_error_pos << " error_steer: " << twiddle_error_steer << std::endl;
                 std::cout << "\033[0m"; // reset colors
                 twiddle_frames = 0;
-                twiddle_error = 0.0;
+                twiddle_error_pos = 0.0;
+                twiddle_error_steer = 0.0;
                 restarted = false;
                 wait_for_restart = true;
                 std::cout << "Please restart the simulation (ESC and then start the simulation again; don't close the simulator completely)" << std::endl;
