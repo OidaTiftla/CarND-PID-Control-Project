@@ -47,8 +47,9 @@ int main()
   twiddle.deltas.push_back(0.00000002 * 0.5);
   twiddle.deltas.push_back(1 * 0.5);
   bool do_twiddle_optimization = true;
+  bool restarted = false;
 
-  h.onMessage([&pid, &twiddle, &do_twiddle_optimization](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &twiddle, &do_twiddle_optimization, &restarted](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -73,25 +74,37 @@ int main()
           if (do_twiddle_optimization) {
             static int twiddle_frames = 0;
             static double twiddle_error = 0.0;
-            if (twiddle_frames > 100) {
-              twiddle_error += cte * cte;
+            static bool wait_for_restart = false;
+            if (wait_for_restart) {
+              if (restarted) {
+                wait_for_restart = false;
+                restarted = false;
+              }
+            } else {
+              if (twiddle_frames > 100) {
+                twiddle_error += cte * cte;
+              }
+              if (twiddle_frames > 4000) {
+                auto better = twiddle.GenerateNextParameters(twiddle_error);
+                std::cout << (better ? "better" : "worse") << " error: " << twiddle_error << std::endl;
+                twiddle_frames = 0;
+                twiddle_error = 0.0;
+                restarted = false;
+                wait_for_restart = true;
+                std::cout << "Please restart the simulation (ESC and then start the simulation again; don't close the simulator completely)" << std::endl;
+              } else {
+                if (twiddle_frames <= 0) {
+                  pid.Init(twiddle.parameters[0], twiddle.parameters[1], twiddle.parameters[2]);
+                  std::cout << "\033[1;31m"; // switch to red bold text
+                  std::cout << "New parameters: "
+                    << "Kp=" << twiddle.parameters[0] << ", "
+                    << "Ki=" << twiddle.parameters[1] << ", "
+                    << "Kd=" << twiddle.parameters[2] << std::endl;
+                  std::cout << "\033[0m"; // reset colors
+                }
+                ++twiddle_frames;
+              }
             }
-            if (twiddle_frames > 4000) {
-              auto better = twiddle.GenerateNextParameters(twiddle_error);
-              std::cout << (better ? "better" : "worse") << " error: " << twiddle_error << std::endl;
-              twiddle_frames = 0;
-              twiddle_error = 0.0;
-            }
-            if (twiddle_frames <= 0) {
-              pid.Init(twiddle.parameters[0], twiddle.parameters[1], twiddle.parameters[2]);
-              std::cout << "\033[1;31m"; // switch to red bold text
-              std::cout << "New parameters: "
-                << "Kp=" << twiddle.parameters[0] << ", "
-                << "Ki=" << twiddle.parameters[1] << ", "
-                << "Kd=" << twiddle.parameters[2] << std::endl;
-              std::cout << "\033[0m"; // reset colors
-            }
-            ++twiddle_frames;
           }
           steer_value = pid.Update(cte);
 
@@ -132,8 +145,9 @@ int main()
     }
   });
 
-  h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
+  h.onConnection([&h, &restarted](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
     std::cout << "Connected!!!" << std::endl;
+    restarted = true;
   });
 
   h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
