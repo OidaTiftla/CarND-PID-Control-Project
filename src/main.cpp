@@ -37,18 +37,26 @@ int main()
 
   PID pid;
   // TODO: Initialize the pid variable.
-  pid.Init(0.2, 0.00000002, 1);
+  pid.Init(0.14, 0.000000006, 1.0);
   pid.SetOutputLimits(-1.0, 1.0);
 
   Twiddle twiddle;
   twiddle.parameters.push_back(pid.Kp);
   twiddle.parameters.push_back(pid.Ki);
   twiddle.parameters.push_back(pid.Kd);
-  twiddle.deltas.push_back(pid.Kp * 0.05);
-  twiddle.deltas.push_back(pid.Ki * 0.05);
-  twiddle.deltas.push_back(pid.Kd * 0.05);
+  twiddle.deltas.push_back(pid.Kp * 0.3);
+  twiddle.deltas.push_back(pid.Ki * 0.3);
+  twiddle.deltas.push_back(pid.Kd * 0.3);
   bool do_twiddle_optimization = true;
   bool restarted = false;
+
+  if (!do_twiddle_optimization) {
+    // set evaluated optimal parameters
+    // pid.Init(0.402013, 5.55815e-08, 3.17194);
+    // pid.Init(0.14, 0.000000006, 1.0);
+    // pid.Init(0.21568, 4.38e-09, 1.19683); // New deltas: deltaKp=0.0370478, deltaKi=1.29908e-09, deltaKd=0.19683
+    pid.Init(0.191373, 4.38e-09, 1.19683); // New deltas: deltaKp=0.024307, deltaKi=8.52325e-10, deltaKd=0.142054
+  }
 
   h.onMessage([&pid, &twiddle, &do_twiddle_optimization, &restarted](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
