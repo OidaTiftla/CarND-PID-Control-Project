@@ -106,7 +106,7 @@ int main()
                 twiddle_error_pos += std::max(0.0, pow(cte, 4) - 0.125);
                 twiddle_error_steer += std::max(0.0, pow(steer_value_delta, 2) * 10);
               }
-              if (twiddle_frames > 400) {
+              if (twiddle_frames > 550) {
                 auto better = twiddle.GenerateNextParameters(twiddle_error_pos + twiddle_error_steer, 1.1, 0.7);
                 if (better) {
                   std::cout << "\033[0;32m"; // switch to green text
