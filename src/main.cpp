@@ -51,11 +51,20 @@ int main()
   bool restarted = false;
 
   if (!do_twiddle_optimization) {
-    // set evaluated optimal parameters
+    // set evaluated optimal parameters for 0.3 throttle
     // pid.Init(0.402013, 5.55815e-08, 3.17194);
     // pid.Init(0.14, 0.000000006, 1.0);
     // pid.Init(0.21568, 4.38e-09, 1.19683); // New deltas: deltaKp=0.0370478, deltaKi=1.29908e-09, deltaKd=0.19683
     pid.Init(0.191373, 4.38e-09, 1.19683); // New deltas: deltaKp=0.024307, deltaKi=8.52325e-10, deltaKd=0.142054
+
+    // set evaluated optimal parameters for 0.4 throttle
+    // pid.Init(0.22358, 7.8e-09, 1.63); // New deltas: deltaKp=0.04158, deltaKi=1.782e-09, deltaKd=0.363
+    // pid.Init(0.22358, 9.24342e-09, 1.63); // New deltas: deltaKp=0.0370478, deltaKi=1.44342e-09, deltaKd=0.29403
+
+    // set evaluated optimal parameters for 0.5 throttle
+    // pid.Init(0.14, 5.64342e-09, 1.3); // New deltas: deltaKp=0.0248006, deltaKi=1.44342e-09, deltaKd=0.24057
+    // pid.Init(0.14, 7.23118e-09, 1.3); // New deltas: deltaKp=0.0180796, deltaKi=1.4147e-09, deltaKd=0.157838
+    // pid.Init(0.172001, 7.23118e-09, 1.3); // New deltas: deltaKp=0.00126113, deltaKi=3.99618e-11, deltaKd=0.00636933
   }
 
   h.onMessage([&pid, &twiddle, &do_twiddle_optimization, &restarted](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
