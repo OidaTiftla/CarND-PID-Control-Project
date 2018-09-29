@@ -10,7 +10,7 @@ public:
     double best_err = std::numeric_limits<const double>::infinity();
 
     // returns whether the last parameters were better (true) or not (false)
-    bool GenerateNextParameters(double err) {
+    bool GenerateNextParameters(double err, double good_factor = 1.1, double bad_factor = 0.7) {
         static int param_index = 0;
         static bool tested_add = false;
         static bool tested_sub = false;
@@ -20,7 +20,7 @@ public:
             if (err < this->best_err) {
                 this->best_err = err;
                 better = true;
-                this->deltas[param_index] *= 1.1;
+                this->deltas[param_index] *= good_factor;
                 ++param_index;
                 if (param_index >= this->parameters.size()) {
                     param_index = 0;
@@ -37,10 +37,10 @@ public:
             if (err < this->best_err) {
                 this->best_err = err;
                 better = true;
-                this->deltas[param_index] *= 1.1;
+                this->deltas[param_index] *= good_factor;
             } else {
                 this->parameters[param_index] += this->deltas[param_index];
-                this->deltas[param_index] *= 0.9;
+                this->deltas[param_index] *= bad_factor;
             }
             ++param_index;
             if (param_index >= this->parameters.size()) {
