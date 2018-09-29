@@ -96,3 +96,16 @@ still be compilable with cmake and make./
 ## How to write a README
 A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
 
+## P, I, D components
+
+If you have a quite stable set of parameters and now increase the P component, the vehicle starts oscillating around the center position, because the D part is now to small, to compensate the fast cross track error reduction.
+
+It is the same with the I component, but a too large I component cannot be compensated by the D component. The vehicle keeps oscillating.
+
+The D part is in my opinion the most important one in the vehicle example, because a steering of 0 does not mean that the cross track error keeps being the same. The vehicle will drive in the direction it currently is. If it is towards the center of the track it will first reduce the cross track error and afterwards increase it again, because it crossed the center of the lane. Therefore the D part can help steer towards the direction of the center line.
+
+## How I got the resulting parameters
+
+I tested some parameters with the simulation and finally got some set of parameters which were able to drive at least some part of the simulation. Then I started to implement twiddle into the program and optimize those parameters to drive better. It was quite tricky to find some meta-parameters for the twiddle algorithm that slowly adjusted the parameters to get a better solution than me.
+
+The parameters got from twiddle are more unstable and tend to get as fast as possible to the center line. I tried to include some error component, that makes a more stable car better in terms of the twiddle error function.
